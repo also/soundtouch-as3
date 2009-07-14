@@ -117,7 +117,7 @@ package com.ryanberdeen.soundtouch {
       bAutoSeqSetting = true;
       bAutoSeekSetting = true;
 
-      _tempo = 1.5;
+      _tempo = 1;
       setParameters(44100, DEFAULT_SEQUENCE_MS, DEFAULT_SEEKWINDOW_MS, DEFAULT_OVERLAP_MS);
     }
 
