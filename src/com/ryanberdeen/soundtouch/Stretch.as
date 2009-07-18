@@ -468,9 +468,9 @@ package com.ryanberdeen.soundtouch {
 
       if (pMidBuffer == null)
       {
-        pMidBuffer = new Vector.<Number>(overlapLength * 16);
+        pMidBuffer = new Vector.<Number>(overlapLength * 2);
         var pMidBufferPos:int = 0;
-        sourcePosition += _sound.extract(bytes, overlapLength * 8, sourcePosition); // channels * overlapLength * bytes/sample/channel
+        sourcePosition += _sound.extract(bytes, overlapLength, sourcePosition); // channels * overlapLength * bytes/sample/channel
         bytes.position = 0;
         while (bytes.bytesAvailable > 0) {
           pMidBuffer[pMidBufferPos++] = bytes.readFloat();
@@ -484,10 +484,10 @@ package com.ryanberdeen.soundtouch {
       // FIXME handle input empty
       while (output.length < 4096)
       {
-          var input:Vector.<Number> = new Vector.<Number>(sampleReq * 4);
+          var input:Vector.<Number> = new Vector.<Number>(sampleReq * 2);
           var inputPos:int = 0;
           bytes.position = 0;
-          _sound.extract(bytes, sampleReq * 2, sourcePosition);
+          _sound.extract(bytes, sampleReq, sourcePosition);
           bytes.position = 0;
           while (bytes.bytesAvailable > 0) {
             input[inputPos++] = bytes.readFloat();
@@ -517,7 +517,7 @@ package com.ryanberdeen.soundtouch {
           //assert(offset + seekWindowLength <= (int)inputBuffer.numSamples());
           pMidBuffer = new Vector.<Number>();
 
-          append(pMidBuffer, input, 2 * (offset + seekWindowLength - overlapLength), 8 * overlapLength);
+          append(pMidBuffer, input, 2 * (offset + seekWindowLength - overlapLength), 2 * overlapLength);
 
           // Remove the processed samples from the input buffer. Update
           // the difference between integer & nominal skip step to 'skipFract'
