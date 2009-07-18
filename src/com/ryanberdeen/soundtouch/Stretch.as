@@ -213,7 +213,6 @@ package com.ryanberdeen.soundtouch {
 
       overlapLength = newOvl;
 
-      // TODO make fixed size
       pRefMidBuffer = new Vector.<Number>();
     }
 
@@ -395,12 +394,12 @@ package com.ryanberdeen.soundtouch {
         var cnt2:int;
         var temp:int;
 
-        for (i=0 ; i < int(overlapLength) ;i ++)
+        for (i=0 ; i < overlapLength ;i ++)
         {
-            temp = Number(i) * Number(overlapLength - i);
+            temp = i * (overlapLength - i);
             cnt2 = i * 2;
-            pRefMidBuffer[cnt2] = Number(pMidBuffer[cnt2] * temp);
-            pRefMidBuffer[cnt2 + 1] = Number(pMidBuffer[cnt2 + 1] * temp);
+            pRefMidBuffer[cnt2] = pMidBuffer[cnt2] * temp;
+            pRefMidBuffer[cnt2 + 1] = pMidBuffer[cnt2 + 1] * temp;
         }
     }
 
@@ -444,14 +443,14 @@ package com.ryanberdeen.soundtouch {
       var pOutputPos:int = pOutput.length;
 
       // make room in pOutput
-      pOutput.length += int(overlapLength) * 2;
+      pOutput.length += overlapLength * 2;
 
-      fScale = 1 / Number(overlapLength);
+      fScale = 1 / overlapLength;
 
-      for (i = 0; i < int(overlapLength) ; i ++)
+      for (i = 0; i < overlapLength ; i ++)
       {
-          fTemp = Number(overlapLength - i) * fScale;
-          fi = Number(i) * fScale;
+          fTemp = (overlapLength - i) * fScale;
+          fi = i * fScale;
           cnt2 = 2 * i;
           pInputOffset = cnt2 + pInputPos;
           pOutputOffset = cnt2 + pOutputPos;
@@ -527,7 +526,7 @@ package com.ryanberdeen.soundtouch {
           skipFract += nominalSkip;   // real skip size
           ovlSkip = int(skipFract);   // rounded to integer skip
           skipFract -= ovlSkip;       // maintain the fraction part, i.e. real vs. integer skip
-          sourcePosition += uint(ovlSkip);
+          sourcePosition += ovlSkip;
       }
 
       // copy output buffer to target
