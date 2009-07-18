@@ -116,7 +116,7 @@ package com.ryanberdeen.soundtouch {
     private var bAutoSeekSetting:Boolean;
 
     public function Stretch():void {
-      bQuickSeek = false;
+      bQuickSeek = true;
       bMidBufferDirty = false;
 
       pMidBuffer = null;
@@ -277,7 +277,6 @@ package com.ryanberdeen.soundtouch {
     */
     private function seekBestOverlapPosition(buffer:Vector.<Number>):int
     {
-      return seekBestOverlapPositionStereoQuick(buffer);
       if (bQuickSeek)
       {
           return seekBestOverlapPositionStereoQuick(buffer);
