@@ -439,6 +439,12 @@ package com.ryanberdeen.soundtouch {
       var fScale:Number;
       var fi:Number;
       var pInputOffset:int;
+      var pOutputOffset:int;
+
+      var pOutputPos:int = pOutput.length;
+
+      // make room in pOutput
+      pOutput.length += int(overlapLength) * 2;
 
       fScale = 1 / Number(overlapLength);
 
@@ -448,8 +454,9 @@ package com.ryanberdeen.soundtouch {
           fi = Number(i) * fScale;
           cnt2 = 2 * i;
           pInputOffset = cnt2 + pInputPos;
-          pOutput[pOutput.length] = pInput[pInputOffset + 0] * fi + pMidBuffer[cnt2 + 0] * fTemp;
-          pOutput[pOutput.length] = pInput[pInputOffset + 1] * fi + pMidBuffer[cnt2 + 1] * fTemp;
+          pOutputOffset = cnt2 + pOutputPos;
+          pOutput[pOutputOffset + 0] = pInput[pInputOffset + 0] * fi + pMidBuffer[cnt2 + 0] * fTemp;
+          pOutput[pOutputOffset + 1] = pInput[pInputOffset + 1] * fi + pMidBuffer[cnt2 + 1] * fTemp;
       }
     }
 
@@ -463,11 +470,13 @@ package com.ryanberdeen.soundtouch {
 
       if (pMidBuffer == null)
       {
-        pMidBuffer = new Vector.<Number>();
-        sourcePosition += _sound.extract(bytes, 2 * overlapLength * 4, sourcePosition); // channels * overlapLength * bytes/sample/channel
+        pMidBuffer = new Vector.<Number>(overlapLength * 16);
+        var pMidBufferPos:int = 0;
+        sourcePosition += _sound.extract(bytes, overlapLength * 8, sourcePosition); // channels * overlapLength * bytes/sample/channel
         bytes.position = 0;
         while (bytes.bytesAvailable > 0) {
-          pMidBuffer.push(bytes.readFloat(), bytes.readFloat());
+          pMidBuffer[pMidBufferPos++] = bytes.readFloat();
+          pMidBuffer[pMidBufferPos++] = bytes.readFloat();
         }
       }
 
@@ -477,12 +486,14 @@ package com.ryanberdeen.soundtouch {
       // FIXME handle input empty
       while (output.length < 4096)
       {
-          var input:Vector.<Number> = new Vector.<Number>();
+          var input:Vector.<Number> = new Vector.<Number>(sampleReq * 4);
+          var inputPos:int = 0;
           bytes.position = 0;
           _sound.extract(bytes, sampleReq * 2, sourcePosition);
           bytes.position = 0;
           while (bytes.bytesAvailable > 0) {
-            input.push(bytes.readFloat(), bytes.readFloat());
+            input[inputPos++] = bytes.readFloat();
+            input[inputPos++] = bytes.readFloat();
           }
 
           // If tempo differs from the normal ('SCALE'), scan for the best overlapping
@@ -528,9 +539,13 @@ package com.ryanberdeen.soundtouch {
     }
 
     private function append(dest:Vector.<Number>, source:Vector.<Number>, offset:int, length:int):void {
+      var destPos:int = dest.length;
+      dest.length += length;
+
       var max:int = offset + length;
+
       for (var i:int = offset; i < max; i++) {
-        dest.push(source[i]);
+        dest[destPos++] = source[i];
       }
     }
   }
