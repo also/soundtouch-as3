@@ -13,15 +13,11 @@
   </mx:Panel>
 
   <mx:Script><![CDATA[
-    import com.ryanberdeen.audio.SampleSourcePlayer;
-    import com.ryanberdeen.audio.SoundSampleSource;
-    import com.ryanberdeen.soundtouch.StretchSS;
+    import com.ryanberdeen.soundtouch.Stretch;
 
     import flash.events.Event;
     import flash.media.Sound;
     import flash.net.FileReference;
-
-    import mx.collections.ArrayCollection;
 
     import org.audiofx.mp3.MP3FileReferenceLoader;
     import org.audiofx.mp3.MP3SoundEvent;
@@ -30,21 +26,21 @@
     private var mp3Loader:MP3FileReferenceLoader;
     private var sound:Sound;
 
-    private var player:SampleSourcePlayer;
-    private var playing:Boolean;
+    private var outputSound:Sound;
+    private var soundChannel:SoundChannel;
+    private var stretch:Stretch;
 
-    private var stretchSs:StretchSS;
+    private var playing:Boolean;
 
     private function reset():void {
       resetPlayer();
     }
 
     private function resetPlayer():void {
-      if (player != null) {
-        player.stop();
-
-        player = null;
+      if (playing) {
+        pause();
       }
+      soundChannel = null;
     }
 
     private function chooseFile():void {
@@ -71,16 +67,22 @@
 
     private function preparePlayer():void {
       resetPlayer();
-      player = new SampleSourcePlayer();
-      player.addEventListener(Event.SOUND_COMPLETE, playerSoundCompleteHandler);
-      stretchSs = new StretchSS(sound, tempoSlider.value);
-      player.sampleSource = stretchSs;
+
+      outputSound = new Sound();
+      stretch = new Stretch();
+      stretch.sound = sound;
+      stretch.tempo = tempoSlider.value;
+
+      outputSound.addEventListener(SampleDataEvent.SAMPLE_DATA, function(e:SampleDataEvent):void {
+        var result:Number = stretch.process(e.data);
+      });
+
       playButton.enabled = true;
       playButton.label = "Play";
       playing = false;
     }
 
-    private function playerSoundCompleteHandler(e:Event):void {
+    private function soundCompleteHandler(e:Event):void {
       preparePlayer();
     }
 
@@ -94,13 +96,21 @@
     }
 
     private function play():void {
-      player.start();
+      soundChannel = outputSound.play();
+      soundChannel.addEventListener(Event.SOUND_COMPLETE, soundCompleteHandler);
+      playing = true;
+
       playButton.label = "Pause";
       playing = true;
     }
 
     private function pause():void {
-      player.stop();
+      if (playing) {
+        soundChannel.removeEventListener(Event.SOUND_COMPLETE, soundCompleteHandler);
+        soundChannel.stop();
+        playing = false;
+      }
+
       playButton.label = "Play";
       playing = false;
     }
