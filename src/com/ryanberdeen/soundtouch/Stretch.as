@@ -28,51 +28,59 @@ package com.ryanberdeen.soundtouch {
   public class Stretch {
     // Default values for sound processing parameters:
 
-    /// Default length of a single processing sequence, in milliseconds. This determines to how
-    /// long sequences the original sound is chopped in the time-stretch algorithm.
-    ///
-    /// The larger this value is, the lesser sequences are used in processing. In principle
-    /// a bigger value sounds better when slowing down tempo, but worse when increasing tempo
-    /// and vice versa.
-    ///
-    /// Increasing this value reduces computational burden & vice versa.
+    /**
+    * Default length of a single processing sequence, in milliseconds. This determines to how
+    * long sequences the original sound is chopped in the time-stretch algorithm.
+    *
+    * The larger this value is, the lesser sequences are used in processing. In principle
+    * a bigger value sounds better when slowing down tempo, but worse when increasing tempo
+    * and vice versa.
+    *
+    * Increasing this value reduces computational burden and vice versa.
+    */
     //public static const DEFAULT_SEQUENCE_MS:int = 130
     public static const DEFAULT_SEQUENCE_MS:int = USE_AUTO_SEQUENCE_LEN;
 
-    /// Giving this value for the sequence length sets automatic parameter value
-    /// according to tempo setting (recommended)
+    /**
+    * Giving this value for the sequence length sets automatic parameter value
+    * according to tempo setting (recommended)
+    */
     public static const USE_AUTO_SEQUENCE_LEN:int = 0;
 
-    /// Seeking window default length in milliseconds for algorithm that finds the best possible
-    /// overlapping location. This determines from how wide window the algorithm may look for an
-    /// optimal joining location when mixing the sound sequences back together.
-    ///
-    /// The bigger this window setting is, the higher the possibility to find a better mixing
-    /// position will become, but at the same time large values may cause a "drifting" artifact
-    /// because consequent sequences will be taken at more uneven intervals.
-    ///
-    /// If there's a disturbing artifact that sounds as if a constant frequency was drifting
-    /// around, try reducing this setting.
-    ///
-    /// Increasing this value increases computational burden & vice versa.
+    /**
+    * Seeking window default length in milliseconds for algorithm that finds the best possible
+    * overlapping location. This determines from how wide window the algorithm may look for an
+    * optimal joining location when mixing the sound sequences back together.
+    *
+    * The bigger this window setting is, the higher the possibility to find a better mixing
+    * position will become, but at the same time large values may cause a "drifting" artifact
+    * because consequent sequences will be taken at more uneven intervals.
+    *
+    * If there's a disturbing artifact that sounds as if a constant frequency was drifting
+    * around, try reducing this setting.
+    *
+    * Increasing this value increases computational burden and vice versa.
+    */
     //public static const DEFAULT_SEEKWINDOW_MS:int = 25;
     public static const DEFAULT_SEEKWINDOW_MS:int = USE_AUTO_SEEKWINDOW_LEN;
 
-    /// Giving this value for the seek window length sets automatic parameter value
-    /// according to tempo setting (recommended)
+    /**
+    * Giving this value for the seek window length sets automatic parameter value
+    * according to tempo setting (recommended)
+    */
     public static const USE_AUTO_SEEKWINDOW_LEN:int = 0;
 
-    /// Overlap length in milliseconds. When the chopped sound sequences are mixed back together,
-    /// to form a continuous sound stream, this parameter defines over how long period the two
-    /// consecutive sequences are let to overlap each other.
-    ///
-    /// This shouldn't be that critical parameter. If you reduce the DEFAULT_SEQUENCE_MS setting
-    /// by a large amount, you might wish to try a smaller value on this.
-    ///
-    /// Increasing this value increases computational burden & vice versa.
+    /**
+    * Overlap length in milliseconds. When the chopped sound sequences are mixed back together,
+    * to form a continuous sound stream, this parameter defines over how long period the two
+    * consecutive sequences are let to overlap each other.
+    *
+    * This shouldn't be that critical parameter. If you reduce the DEFAULT_SEQUENCE_MS setting
+    * by a large amount, you might wish to try a smaller value on this.
+    *
+    * Increasing this value increases computational burden and vice versa.
+    */
     public static const DEFAULT_OVERLAP_MS:int = 8;
-
-    public static const CHANNELS:int = 2;
 
     // Table for the hierarchical mixing position seeking algorithm
     private static const SCAN_OFFSETS:Array = [
@@ -125,14 +133,16 @@ package com.ryanberdeen.soundtouch {
       _sound = sound;
     }
 
-    // Sets routine control parameters. These control are certain time constants
-    // defining how the sound is stretched to the desired duration.
-    //
-    // 'sampleRate' = sample rate of the sound
-    // 'sequenceMS' = one processing sequence length in milliseconds (default = 82 ms)
-    // 'seekwindowMS' = seeking window length for scanning the best overlapping
-    //      position (default = 28 ms)
-    // 'overlapMS' = overlapping length (default = 12 ms)
+    /**
+    * Sets routine control parameters. These control are certain time constants
+    * defining how the sound is stretched to the desired duration.
+    *
+    * 'sampleRate' = sample rate of the sound
+    * 'sequenceMS' = one processing sequence length in milliseconds (default = 82 ms)
+    * 'seekwindowMS' = seeking window length for scanning the best overlapping
+    *      position (default = 28 ms)
+    * 'overlapMS' = overlapping length (default = 12 ms)
+    */
     public function setParameters(aSampleRate:int, aSequenceMS:int,
                               aSeekWindowMS:int, aOverlapMS:int):void {
       // accept only positive parameter values - if zero or negative, use old values instead
@@ -165,8 +175,10 @@ package com.ryanberdeen.soundtouch {
       tempo = _tempo;
     }
 
-    // Sets new target tempo. Normal tempo = 'SCALE', smaller values represent slower
-    // tempo, larger faster tempo.
+    /**
+    * Sets new target tempo. Normal tempo = 'SCALE', smaller values represent slower
+    * tempo, larger faster tempo.
+    */
     public function set tempo(newTempo:Number):void {
       var intskip:int;
 
@@ -186,7 +198,9 @@ package com.ryanberdeen.soundtouch {
     }
 
 
-    /// Calculates overlapInMsec period length in samples.
+    /**
+    * Calculates overlapInMsec period length in samples.
+    */
     private function calculateOverlapLength(overlapInMsec:int):void {
       var newOvl:int;
 
@@ -224,7 +238,9 @@ package com.ryanberdeen.soundtouch {
       return (x < mi) ? mi : ((x > ma) ? ma : x);
     }
 
-    /// Calculates processing sequence length according to tempo setting
+    /**
+    * Calculates processing sequence length according to tempo setting
+    */
     private function calcSeqParameters():void
     {
       var seq:Number;
@@ -249,13 +265,17 @@ package com.ryanberdeen.soundtouch {
       seekLength = (sampleRate * seekWindowMs) / 1000;
     }
 
-    // Enables/disables the quick position seeking algorithm.
+    /**
+    * Enables/disables the quick position seeking algorithm.
+    */
     public function set quickSeek(enable:Boolean):void
     {
         bQuickSeek = enable;
     }
 
-    // Seeks for the optimal overlap-mixing position.
+    /**
+    * Seeks for the optimal overlap-mixing position.
+    */
     private function seekBestOverlapPosition(buffer:Vector.<Number>):int
     {
       return seekBestOverlapPositionStereoQuick(buffer);
@@ -269,12 +289,14 @@ package com.ryanberdeen.soundtouch {
       }
     }
 
-    // Seeks for the optimal overlap-mixing position. The 'stereo' version of the
-    // routine
-    //
-    // The best position is determined as the position where the two overlapped
-    // sample sequences are 'most alike', in terms of the highest cross-correlation
-    // value over the overlapping period
+    /**
+    * Seeks for the optimal overlap-mixing position. The 'stereo' version of the
+    * routine
+    *
+    * The best position is determined as the position where the two overlapped
+    * sample sequences are 'most alike', in terms of the highest cross-correlation
+    * value over the overlapping period
+    */
     private function seekBestOverlapPositionStereo(buffer:Vector.<Number>):int {
         var bestOffs:int;
         var bestCorr:Number
@@ -306,12 +328,14 @@ package com.ryanberdeen.soundtouch {
         return bestOffs;
     }
 
-    // Seeks for the optimal overlap-mixing position. The 'stereo' version of the
-    // routine
-    //
-    // The best position is determined as the position where the two overlapped
-    // sample sequences are 'most alike', in terms of the highest cross-correlation
-    // value over the overlapping period
+    /**
+    * Seeks for the optimal overlap-mixing position. The 'stereo' version of the
+    * routine
+    *
+    * The best position is determined as the position where the two overlapped
+    * sample sequences are 'most alike', in terms of the highest cross-correlation
+    * value over the overlapping period
+    */
     private function seekBestOverlapPositionStereoQuick(buffer:Vector.<Number>):int
     {
         var j:int;
@@ -362,8 +386,10 @@ package com.ryanberdeen.soundtouch {
         return bestOffs;
     }
 
-    // Slopes the amplitude of the 'midBuffer' samples so that cross correlation
-    // is faster to calculate
+    /**
+    * Slopes the amplitude of the 'midBuffer' samples so that cross correlation
+    * is faster to calculate
+    */
     private function precalcCorrReferenceStereo():void {
         var i:int;
         var cnt2:int;
@@ -395,13 +421,17 @@ package com.ryanberdeen.soundtouch {
     }
 
     // TODO inline
-    // Overlaps samples in 'midBuffer' with the samples in 'pInputBuffer' at position
-    // of 'ovlPos'.
+    /**
+    * Overlaps samples in 'midBuffer' with the samples in 'pInputBuffer' at position
+    * of 'ovlPos'.
+    */
     private function overlap(pOutput:Vector.<Number>, pInput:Vector.<Number>, ovlPos:uint):void {
         overlapStereo(pOutput, pInput, 2 * ovlPos);
     }
 
-    // Overlaps samples in 'midBuffer' with the samples in 'pInput'
+    /**
+    * Overlaps samples in 'midBuffer' with the samples in 'pInput'
+    */
     private function overlapStereo(pOutput:Vector.<Number>, pInput:Vector.<Number>, pInputPos:int):void {
       var i:int;
       var cnt2:int;
