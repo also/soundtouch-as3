@@ -2,8 +2,9 @@
 //
 // License :
 //
-//  SoundTouch audio processing library
+//  SoundTouch AS3 audio processing library
 //  Copyright (c) Olli Parviainen
+//  Copyright (c) Ryan Berdeen
 //
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
