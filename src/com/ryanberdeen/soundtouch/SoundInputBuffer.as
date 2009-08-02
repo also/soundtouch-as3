@@ -53,8 +53,12 @@ package com.ryanberdeen.soundtouch {
       return _maxPosition - _position;
     }
 
+    public function get soundFramesAvailable():uint {
+        return _frameCount - _position;
+    }
+
     public function putSamples(numFrames:uint):void {
-      _maxPosition += numFrames;
+      _maxPosition = Math.min(_frameCount, _maxPosition + numFrames);
     }
 
     public function get(target:Vector.<Number>, numFrames:uint):uint {

@@ -208,7 +208,7 @@ package com.ryanberdeen.soundtouch {
     }
 
     public function get inputChunkSize():int {
-      return sampleReq * 2;
+      return sampleReq;
     }
 
     public function get outputChunkSize():int {
@@ -483,6 +483,12 @@ package com.ryanberdeen.soundtouch {
 
       if (pMidBuffer == null)
       {
+        // if midBuffer is empty, move the first samples of the input stream
+        // into it
+        if (_inputBuffer.framesAvailable < overlapLength) {
+            // wait until we've got overlapLength samples
+            return 0;
+        }
         pMidBuffer = new Vector.<Number>(overlapLength * 2);
         _inputBuffer.consume(pMidBuffer, overlapLength);
       }
@@ -490,8 +496,7 @@ package com.ryanberdeen.soundtouch {
       var output:Vector.<Number> = new Vector.<Number>();
       // Process samples as long as there are enough samples in 'inputBuffer'
       // to form a processing frame.
-      // FIXME handle input empty
-      while (output.length < 4096)
+      while (_inputBuffer.framesAvailable >= sampleReq)
       {
           var input:Vector.<Number> = new Vector.<Number>(sampleReq * 2);
           _inputBuffer.get(input, sampleReq);

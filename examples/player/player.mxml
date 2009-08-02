@@ -58,10 +58,16 @@
 
       outputSound = new Sound();
       stretch = new Stretch();
-      stretch.inputBuffer = new SoundInputBuffer(sound);
+      var inputBuffer:SoundInputBuffer = new SoundInputBuffer(sound);
+      stretch.inputBuffer = inputBuffer;
       stretch.tempo = tempoSlider.value;
+
       outputSound.addEventListener(SampleDataEvent.SAMPLE_DATA, function(e:SampleDataEvent):void {
-        var result:Number = stretch.process(e.data);
+        var numFramesOutput:int = 0;
+        while (numFramesOutput < 4096 && inputBuffer.soundFramesAvailable >= stretch.inputChunkSize) {
+          inputBuffer.putSamples(stretch.inputChunkSize - inputBuffer.framesAvailable);
+          numFramesOutput += stretch.process(e.data);
+        }
       });
 
       playButton.enabled = true;
