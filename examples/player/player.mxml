@@ -49,7 +49,7 @@
       fileReference.addEventListener(Event.SELECT, function(e:Event):void {
         loadSound();
       });
-      fileReference.browse();
+      fileReference.browse([new FileFilter("MP3 Files", "*.mp3")]);
     }
 
     private function loadSound():void {
