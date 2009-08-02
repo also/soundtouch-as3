@@ -470,7 +470,7 @@ package com.ryanberdeen.soundtouch {
       {
         pMidBuffer = new Vector.<Number>(overlapLength * 2);
         var pMidBufferPos:int = 0;
-        sourcePosition += _sound.extract(bytes, overlapLength, sourcePosition); // channels * overlapLength * bytes/sample/channel
+        sourcePosition += _sound.extract(bytes, overlapLength, sourcePosition);
         bytes.position = 0;
         while (bytes.bytesAvailable > 0) {
           pMidBuffer[pMidBufferPos++] = bytes.readFloat();
@@ -536,14 +536,12 @@ package com.ryanberdeen.soundtouch {
       return output.length / 2;
     }
 
-    private function append(dest:Vector.<Number>, source:Vector.<Number>, offset:int, length:int):void {
-      var destPos:int = dest.length;
+    private function append(dest:Vector.<Number>, source:Vector.<Number>, sourceOffset:int, length:int):void {
+      var destOffset:int = dest.length;
       dest.length += length;
 
-      var max:int = offset + length;
-
-      for (var i:int = offset; i < max; i++) {
-        dest[destPos++] = source[i];
+      for (var i:int = 0; i < length; i++) {
+        dest[i + destOffset] = source[i + sourceOffset];
       }
     }
   }
