@@ -95,6 +95,7 @@ package com.ryanberdeen.soundtouch {
             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   0]];
 
     private var _sound:Sound;
+    private var sourcePosition:int = 0;
 
     private var sampleReq:int;
     private var _tempo:Number;
@@ -198,6 +199,13 @@ package com.ryanberdeen.soundtouch {
       sampleReq = Math.max(intskip + overlapLength, seekWindowLength) + seekLength;
     }
 
+    public function get tempo():Number {
+      return _tempo;
+    }
+
+    public function get inputChunkSize():int {
+      return sampleReq * 2;
+    }
 
     /**
     * Calculates overlapInMsec period length in samples.
@@ -459,7 +467,6 @@ package com.ryanberdeen.soundtouch {
       }
     }
 
-    private var sourcePosition:int = 0;
     public function process(target:ByteArray):Number {
       var ovlSkip:int;
       var offset:int;
