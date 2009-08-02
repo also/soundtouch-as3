@@ -207,6 +207,10 @@ package com.ryanberdeen.soundtouch {
       return sampleReq * 2;
     }
 
+    public function get outputChunkSize():int {
+      return overlapLength + Math.max(0, seekWindowLength - 2 * overlapLength);
+    }
+
     /**
     * Calculates overlapInMsec period length in samples.
     */
@@ -486,7 +490,7 @@ package com.ryanberdeen.soundtouch {
         }
       }
 
-        var output:Vector.<Number> = new Vector.<Number>();
+      var output:Vector.<Number> = new Vector.<Number>();
       // Process samples as long as there are enough samples in 'inputBuffer'
       // to form a processing frame.
       // FIXME handle input empty
