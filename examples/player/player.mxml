@@ -116,8 +116,8 @@
     }
 
     private function updateTempo():void {
-      if (player != null) {
-        preparePlayer();
+      if (stretch != null) {
+        stretch.tempo = tempoSlider.value;
       }
     }
   ]]></mx:Script>
