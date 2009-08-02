@@ -32,27 +32,14 @@
 
     private var playing:Boolean;
 
-    private function reset():void {
-      resetPlayer();
-    }
-
-    private function resetPlayer():void {
-      if (playing) {
-        pause();
-      }
-      soundChannel = null;
-    }
-
     private function chooseFile():void {
-      reset();
       fileReference = new FileReference();
-      fileReference.addEventListener(Event.SELECT, function(e:Event):void {
-        loadSound();
-      });
+      fileReference.addEventListener(Event.SELECT, handleFileSelected);
       fileReference.browse([new FileFilter("MP3 Files", "*.mp3")]);
     }
 
-    private function loadSound():void {
+    private function handleFileSelected(e:Event):void {
+      resetPlayer();
       mp3Loader = new MP3FileReferenceLoader();
       mp3Loader.addEventListener(Event.COMPLETE, handleSoundLoadComplete);
       mp3Loader.getSound(fileReference);
@@ -72,7 +59,6 @@
       stretch = new Stretch();
       stretch.sound = sound;
       stretch.tempo = tempoSlider.value;
-
       outputSound.addEventListener(SampleDataEvent.SAMPLE_DATA, function(e:SampleDataEvent):void {
         var result:Number = stretch.process(e.data);
       });
@@ -80,6 +66,13 @@
       playButton.enabled = true;
       playButton.label = "Play";
       playing = false;
+    }
+
+    private function resetPlayer():void {
+      if (playing) {
+        pause();
+      }
+      soundChannel = null;
     }
 
     private function soundCompleteHandler(e:Event):void {
