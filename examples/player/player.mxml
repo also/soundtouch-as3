@@ -14,6 +14,7 @@
 
   <mx:Script><![CDATA[
     import com.ryanberdeen.soundtouch.Stretch;
+    import com.ryanberdeen.soundtouch.SoundInputBuffer;
 
     import flash.events.Event;
     import flash.media.Sound;
@@ -57,7 +58,7 @@
 
       outputSound = new Sound();
       stretch = new Stretch();
-      stretch.sound = sound;
+      stretch.inputBuffer = new SoundInputBuffer(sound);
       stretch.tempo = tempoSlider.value;
       outputSound.addEventListener(SampleDataEvent.SAMPLE_DATA, function(e:SampleDataEvent):void {
         var result:Number = stretch.process(e.data);

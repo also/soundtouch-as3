@@ -1,26 +1,22 @@
-////////////////////////////////////////////////////////////////////////////////
-//
-// License :
-//
-//  SoundTouch AS3 audio processing library
-//  Copyright (c) Olli Parviainen
-//  Copyright (c) Ryan Berdeen
-//
-//  This library is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 2.1 of the License, or (at your option) any later version.
-//
-//  This library is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
-//
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with this library; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-////////////////////////////////////////////////////////////////////////////////
+/*
+* SoundTouch AS3 audio processing library
+* Copyright (c) Olli Parviainen
+* Copyright (c) Ryan Berdeen
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
+*
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public
+* License along with this library; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
 
 package com.ryanberdeen.soundtouch {
   import flash.media.Sound;
@@ -94,8 +90,7 @@ package com.ryanberdeen.soundtouch {
         [  -4,   -3,   -2,   -1,    1,    2,    3,    4,    0,    0,    0,   0,
             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   0]];
 
-    private var _sound:Sound;
-    private var sourcePosition:int = 0;
+    private var _inputBuffer:IInputBuffer;
 
     private var sampleReq:int;
     private var _tempo:Number;
@@ -117,6 +112,8 @@ package com.ryanberdeen.soundtouch {
     private var bAutoSeqSetting:Boolean;
     private var bAutoSeekSetting:Boolean;
 
+    private var outputSize:int;
+
     public function Stretch():void {
       bQuickSeek = true;
       bMidBufferDirty = false;
@@ -131,8 +128,8 @@ package com.ryanberdeen.soundtouch {
       setParameters(44100, DEFAULT_SEQUENCE_MS, DEFAULT_SEEKWINDOW_MS, DEFAULT_OVERLAP_MS);
     }
 
-    public function set sound(sound:Sound):void {
-      _sound = sound;
+    public function set inputBuffer(inputBuffer:IInputBuffer):void {
+      _inputBuffer = inputBuffer;
     }
 
     /**
@@ -197,6 +194,13 @@ package com.ryanberdeen.soundtouch {
       // Calculate how many samples are needed in the 'inputBuffer' to
       // process another batch of samples
       sampleReq = Math.max(intskip + overlapLength, seekWindowLength) + seekLength;
+
+      outputSize = overlapLength;
+
+      var temp:int = (seekWindowLength - 2 * overlapLength);
+      if (temp > 0) {
+        outputSize += temp;
+      }
     }
 
     public function get tempo():Number {
@@ -475,19 +479,12 @@ package com.ryanberdeen.soundtouch {
       var ovlSkip:int;
       var offset:int;
       var temp:int;
-      var bytes:ByteArray = new ByteArray();
       var i:int;
 
       if (pMidBuffer == null)
       {
         pMidBuffer = new Vector.<Number>(overlapLength * 2);
-        var pMidBufferPos:int = 0;
-        sourcePosition += _sound.extract(bytes, overlapLength, sourcePosition);
-        bytes.position = 0;
-        while (bytes.bytesAvailable > 0) {
-          pMidBuffer[pMidBufferPos++] = bytes.readFloat();
-          pMidBuffer[pMidBufferPos++] = bytes.readFloat();
-        }
+        _inputBuffer.consume(pMidBuffer, overlapLength);
       }
 
       var output:Vector.<Number> = new Vector.<Number>();
@@ -497,14 +494,7 @@ package com.ryanberdeen.soundtouch {
       while (output.length < 4096)
       {
           var input:Vector.<Number> = new Vector.<Number>(sampleReq * 2);
-          var inputPos:int = 0;
-          bytes.position = 0;
-          _sound.extract(bytes, sampleReq, sourcePosition);
-          bytes.position = 0;
-          while (bytes.bytesAvailable > 0) {
-            input[inputPos++] = bytes.readFloat();
-            input[inputPos++] = bytes.readFloat();
-          }
+          _inputBuffer.get(input, sampleReq);
 
           // If tempo differs from the normal ('SCALE'), scan for the best overlapping
           // position
@@ -537,7 +527,7 @@ package com.ryanberdeen.soundtouch {
           skipFract += nominalSkip;   // real skip size
           ovlSkip = int(skipFract);   // rounded to integer skip
           skipFract -= ovlSkip;       // maintain the fraction part, i.e. real vs. integer skip
-          sourcePosition += ovlSkip;
+          _inputBuffer.advance(ovlSkip);
       }
 
       // copy output buffer to target
