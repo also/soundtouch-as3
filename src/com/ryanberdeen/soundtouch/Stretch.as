@@ -113,8 +113,6 @@ package com.ryanberdeen.soundtouch {
     private var bAutoSeqSetting:Boolean;
     private var bAutoSeekSetting:Boolean;
 
-    private var outputSize:int;
-
     public function Stretch():void {
       bQuickSeek = true;
       bMidBufferDirty = false;
@@ -199,13 +197,6 @@ package com.ryanberdeen.soundtouch {
       // Calculate how many samples are needed in the 'inputBuffer' to
       // process another batch of samples
       sampleReq = Math.max(intskip + overlapLength, seekWindowLength) + seekLength;
-
-      outputSize = overlapLength;
-
-      var temp:int = (seekWindowLength - 2 * overlapLength);
-      if (temp > 0) {
-        outputSize += temp;
-      }
     }
 
     public function get tempo():Number {
