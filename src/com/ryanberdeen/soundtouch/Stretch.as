@@ -90,7 +90,8 @@ package com.ryanberdeen.soundtouch {
         [  -4,   -3,   -2,   -1,    1,    2,    3,    4,    0,    0,    0,   0,
             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   0]];
 
-    private var _inputBuffer:IInputBuffer;
+    private var _inputBuffer:FifoSampleBuffer;
+    private var _outputBuffer:FifoSampleBuffer;
 
     private var sampleReq:int;
     private var _tempo:Number;
@@ -128,8 +129,12 @@ package com.ryanberdeen.soundtouch {
       setParameters(44100, DEFAULT_SEQUENCE_MS, DEFAULT_SEEKWINDOW_MS, DEFAULT_OVERLAP_MS);
     }
 
-    public function set inputBuffer(inputBuffer:IInputBuffer):void {
+    public function set inputBuffer(inputBuffer:FifoSampleBuffer):void {
       _inputBuffer = inputBuffer;
+    }
+
+    public function set outputBuffer(outputBuffer:FifoSampleBuffer):void {
+      _outputBuffer = outputBuffer;
     }
 
     /**
@@ -292,15 +297,15 @@ package com.ryanberdeen.soundtouch {
     /**
     * Seeks for the optimal overlap-mixing position.
     */
-    private function seekBestOverlapPosition(buffer:Vector.<Number>):int
+    private function seekBestOverlapPosition():int
     {
       if (bQuickSeek)
       {
-          return seekBestOverlapPositionStereoQuick(buffer);
+          return seekBestOverlapPositionStereoQuick();
       }
       else
       {
-          return seekBestOverlapPositionStereo(buffer);
+          return seekBestOverlapPositionStereo();
       }
     }
 
@@ -312,7 +317,7 @@ package com.ryanberdeen.soundtouch {
     * sample sequences are 'most alike', in terms of the highest cross-correlation
     * value over the overlapping period
     */
-    private function seekBestOverlapPositionStereo(buffer:Vector.<Number>):int {
+    private function seekBestOverlapPositionStereo():int {
         var bestOffs:int;
         var bestCorr:Number
         var corr:Number;
@@ -330,7 +335,7 @@ package com.ryanberdeen.soundtouch {
         {
             // Calculates correlation value for the mixing position corresponding
             // to 'i'
-            corr = calcCrossCorrStereo(buffer, 2 * i, pRefMidBuffer);
+            corr = calcCrossCorrStereo(2 * i, pRefMidBuffer);
 
             // Checks for the highest correlation value
             if (corr > bestCorr)
@@ -351,7 +356,7 @@ package com.ryanberdeen.soundtouch {
     * sample sequences are 'most alike', in terms of the highest cross-correlation
     * value over the overlapping period
     */
-    private function seekBestOverlapPositionStereoQuick(buffer:Vector.<Number>):int
+    private function seekBestOverlapPositionStereoQuick():int
     {
         var j:int;
         var bestOffs:int;
@@ -385,7 +390,7 @@ package com.ryanberdeen.soundtouch {
 
                 // Calculates correlation value for the mixing position corresponding
                 // to 'tempOffset'
-                corr = calcCrossCorrStereo(buffer, 2 * tempOffset, pRefMidBuffer);
+                corr = calcCrossCorrStereo(2 * tempOffset, pRefMidBuffer);
 
                 // Checks for the highest correlation value
                 if (corr > bestCorr)
@@ -419,7 +424,10 @@ package com.ryanberdeen.soundtouch {
         }
     }
 
-    private function calcCrossCorrStereo(mixing:Vector.<Number>, mixingPos:int, compare:Vector.<Number>):Number {
+    private function calcCrossCorrStereo(mixingPos:int, compare:Vector.<Number>):Number {
+      var mixing:Vector.<Number> = _inputBuffer.vector;
+      mixingPos += _inputBuffer.startIndex;
+
       var corr:Number;
       var i:int;
       var mixingOffset:int;
@@ -440,14 +448,20 @@ package com.ryanberdeen.soundtouch {
     * Overlaps samples in 'midBuffer' with the samples in 'pInputBuffer' at position
     * of 'ovlPos'.
     */
-    private function overlap(pOutput:Vector.<Number>, pInput:Vector.<Number>, ovlPos:uint):void {
-        overlapStereo(pOutput, pInput, 2 * ovlPos);
+    private function overlap(ovlPos:uint):void {
+        overlapStereo(2 * ovlPos);
     }
 
     /**
     * Overlaps samples in 'midBuffer' with the samples in 'pInput'
     */
-    private function overlapStereo(pOutput:Vector.<Number>, pInput:Vector.<Number>, pInputPos:int):void {
+    private function overlapStereo(pInputPos:int):void {
+      var pInput:Vector.<Number> = _inputBuffer.vector;
+      pInputPos += _inputBuffer.startIndex;
+
+      var pOutput:Vector.<Number> = _outputBuffer.vector;
+      var pOutputPos:int = _outputBuffer.endIndex;
+
       var i:int;
       var cnt2:int;
       var fTemp:Number;
@@ -455,11 +469,6 @@ package com.ryanberdeen.soundtouch {
       var fi:Number;
       var pInputOffset:int;
       var pOutputOffset:int;
-
-      var pOutputPos:int = pOutput.length;
-
-      // make room in pOutput
-      pOutput.length += overlapLength * 2;
 
       fScale = 1 / overlapLength;
 
@@ -475,7 +484,7 @@ package com.ryanberdeen.soundtouch {
       }
     }
 
-    public function process(target:ByteArray):Number {
+    public function process():void {
       var ovlSkip:int;
       var offset:int;
       var temp:int;
@@ -485,37 +494,36 @@ package com.ryanberdeen.soundtouch {
       {
         // if midBuffer is empty, move the first samples of the input stream
         // into it
-        if (_inputBuffer.framesAvailable < overlapLength) {
+        if (_inputBuffer.frameCount < overlapLength) {
             // wait until we've got overlapLength samples
-            return 0;
+            return;
         }
         pMidBuffer = new Vector.<Number>(overlapLength * 2);
-        _inputBuffer.consume(pMidBuffer, overlapLength);
+        _inputBuffer.receiveSamples(pMidBuffer, overlapLength);
       }
 
-      var output:Vector.<Number> = new Vector.<Number>();
+      var output:Vector.<Number>;
       // Process samples as long as there are enough samples in 'inputBuffer'
       // to form a processing frame.
-      while (_inputBuffer.framesAvailable >= sampleReq)
+      while (_inputBuffer.frameCount >= sampleReq)
       {
-          var input:Vector.<Number> = new Vector.<Number>(sampleReq * 2);
-          _inputBuffer.get(input, sampleReq);
-
           // If tempo differs from the normal ('SCALE'), scan for the best overlapping
           // position
-          offset = seekBestOverlapPosition(input);
+          offset = seekBestOverlapPosition();
 
           // Mix the samples in the 'inputBuffer' at position of 'offset' with the
           // samples in 'midBuffer' using sliding overlapping
           // ... first partially overlap with the end of the previous sequence
           // (that's in 'midBuffer')
-          overlap(output, input, uint(offset));
+          _outputBuffer.ensureCapacity(_outputBuffer + overlapLength);
+          overlap(uint(offset));
+          _outputBuffer.put(overlapLength);
 
           // ... then copy sequence samples from 'inputBuffer' to output
           temp = (seekWindowLength - 2 * overlapLength);// & 0xfffffffe;
           if (temp > 0)
           {
-            append(output, input, 2 * (offset + overlapLength), temp * 2);
+              _outputBuffer.putBuffer(_inputBuffer, offset + overlapLength, temp);
           }
 
           // Copies the end of the current sequence from 'inputBuffer' to
@@ -524,7 +532,7 @@ package com.ryanberdeen.soundtouch {
           //assert(offset + seekWindowLength <= (int)inputBuffer.numSamples());
           pMidBuffer = new Vector.<Number>();
 
-          append(pMidBuffer, input, 2 * (offset + seekWindowLength - overlapLength), 2 * overlapLength);
+          appendInput(pMidBuffer, 2 * (offset + seekWindowLength - overlapLength), 2 * overlapLength);
 
           // Remove the processed samples from the input buffer. Update
           // the difference between integer & nominal skip step to 'skipFract'
@@ -532,18 +540,14 @@ package com.ryanberdeen.soundtouch {
           skipFract += nominalSkip;   // real skip size
           ovlSkip = int(skipFract);   // rounded to integer skip
           skipFract -= ovlSkip;       // maintain the fraction part, i.e. real vs. integer skip
-          _inputBuffer.advance(ovlSkip);
+          _inputBuffer.receive(ovlSkip);
       }
-
-      // copy output buffer to target
-      for (i = 0; i < output.length; i++) {
-        target.writeFloat(output[i]);
-      }
-
-      return output.length / 2;
     }
 
-    private function append(dest:Vector.<Number>, source:Vector.<Number>, sourceOffset:int, length:int):void {
+    private function appendInput(dest:Vector.<Number>, sourceOffset:int, length:int):void {
+      var source:Vector.<Number> = _inputBuffer.vector;
+      sourceOffset += _inputBuffer.startIndex;
+
       var destOffset:int = dest.length;
       dest.length += length;
 

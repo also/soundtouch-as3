@@ -14,7 +14,7 @@
 
   <mx:Script><![CDATA[
     import com.ryanberdeen.soundtouch.Stretch;
-    import com.ryanberdeen.soundtouch.SoundInputBuffer;
+    import com.ryanberdeen.soundtouch.FifoSampleBuffer;
 
     import flash.events.Event;
     import flash.media.Sound;
@@ -58,16 +58,28 @@
 
       outputSound = new Sound();
       stretch = new Stretch();
-      var inputBuffer:SoundInputBuffer = new SoundInputBuffer(sound);
+      var inputBuffer:FifoSampleBuffer = new FifoSampleBuffer();
+      var outputBuffer:FifoSampleBuffer = new FifoSampleBuffer();
       stretch.inputBuffer = inputBuffer;
+      stretch.outputBuffer = outputBuffer;
       stretch.tempo = tempoSlider.value;
 
+      var sourcePosition:uint = 0;
+
       outputSound.addEventListener(SampleDataEvent.SAMPLE_DATA, function(e:SampleDataEvent):void {
-        var numFramesOutput:int = 0;
-        while (numFramesOutput < 4096 && inputBuffer.soundFramesAvailable >= stretch.inputChunkSize) {
-          inputBuffer.putSamples(stretch.inputChunkSize - inputBuffer.framesAvailable);
-          numFramesOutput += stretch.process(e.data);
+        while (outputBuffer.frameCount < 4096) {
+          var bytes:ByteArray = new ByteArray();
+          var numFrames:uint = stretch.inputChunkSize - inputBuffer.frameCount;
+          var numFramesExtracted:uint = sound.extract(bytes, numFrames, sourcePosition);
+          if (numFramesExtracted < numFrames) {
+            return;
+            // TODO flush stretch
+          }
+          sourcePosition += numFramesExtracted;
+          inputBuffer.putBytes(bytes);
+          stretch.process();
         }
+        outputBuffer.receiveBytes(e.data, 4096);
       });
 
       playButton.enabled = true;
