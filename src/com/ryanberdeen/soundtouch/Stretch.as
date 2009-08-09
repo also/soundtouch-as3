@@ -285,6 +285,13 @@ package com.ryanberdeen.soundtouch {
         bQuickSeek = enable;
     }
 
+    public function clone():Stretch {
+        var result:Stretch = new Stretch();
+        result.tempo = tempo;
+        result.setParameters(sampleRate, sequenceMs, seekWindowMs, overlapMs);
+        return result;
+    }
+
     /**
     * Seeks for the optimal overlap-mixing position.
     */
