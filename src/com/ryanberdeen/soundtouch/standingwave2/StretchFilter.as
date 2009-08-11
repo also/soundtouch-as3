@@ -106,6 +106,7 @@ package com.ryanberdeen.soundtouch.standingwave2 {
         public function clone():IAudioSource {
             var result:StretchFilter = new StretchFilter();
             result._stretch = _stretch.clone();
+            result.resetBuffers();
             return result;
         }
     }
