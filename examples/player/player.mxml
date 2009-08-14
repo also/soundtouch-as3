@@ -5,6 +5,7 @@
     <mx:HBox paddingBottom="10">
       <mx:Button id="browseButton" label="Choose a song…" click="chooseFile();"/>
     </mx:HBox>
+    <mx:CheckBox id="quickSeekCheckbox" label="Quick Seek" change="updateQuickSeek();"/>
     <mx:VBox width="100%">
       <mx:Label text="Tempo Adjustment"/>
       <mx:HSlider id="tempoSlider" minimum="0" maximum="2" value="1" snapInterval="0.01" liveDragging="false" change="updateTempo();" width="100%"/>
@@ -63,6 +64,7 @@
       stretch.inputBuffer = inputBuffer;
       stretch.outputBuffer = outputBuffer;
       stretch.tempo = tempoSlider.value;
+      stretch.quickSeek = quickSeekCheckbox.selected;
 
       var sourcePosition:uint = 0;
 
@@ -128,8 +130,14 @@
     }
 
     private function updateTempo():void {
-      if (stretch != null) {
+      if (stretch) {
         stretch.tempo = tempoSlider.value;
+      }
+    }
+
+    private function updateQuickSeek():void {
+      if (stretch) {
+        stretch.quickSeek = quickSeekCheckbox.selected;
       }
     }
   ]]></mx:Script>
