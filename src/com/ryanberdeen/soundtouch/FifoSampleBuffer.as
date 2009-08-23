@@ -127,7 +127,7 @@ package com.ryanberdeen.soundtouch {
         public function rewind():void {
             if (_position > 0) {
                 var offset:int = startIndex;
-                var numSamples = frameCount * 2;
+                var numSamples:int = frameCount * 2;
                 for (var i:int = 0; i < numSamples; i++) {
                     _vector[i] = _vector[i + offset];
                 }
