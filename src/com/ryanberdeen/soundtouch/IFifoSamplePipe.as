@@ -19,31 +19,9 @@
 */
 
 package com.ryanberdeen.soundtouch {
-    public class AbstractFifoSamplePipe {
-        protected var _inputBuffer:FifoSampleBuffer;
-        protected var _outputBuffer:FifoSampleBuffer;
-
-        public function AbstractFifoSamplePipe(createBuffers:Boolean = false) {
-            if (createBuffers) {
-                inputBuffer = new FifoSampleBuffer();
-                outputBuffer = new FifoSampleBuffer();
-            }
-        }
-
-        public function get inputBuffer():FifoSampleBuffer {
-            return _inputBuffer;
-        }
-
-        public function set inputBuffer(inputBuffer:FifoSampleBuffer):void {
-          _inputBuffer = inputBuffer;
-        }
-
-        public function get outputBuffer():FifoSampleBuffer {
-            return _outputBuffer;
-        }
-
-        public function set outputBuffer(outputBuffer:FifoSampleBuffer):void {
-          _outputBuffer = outputBuffer;
-        }
+    public interface IFifoSamplePipe {
+        function get inputBuffer():FifoSampleBuffer;
+        function get outputBuffer():FifoSampleBuffer;
+        function process():void;
     }
 }

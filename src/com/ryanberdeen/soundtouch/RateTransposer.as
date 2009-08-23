@@ -19,13 +19,14 @@
 */
 
 package com.ryanberdeen.soundtouch {
-    public class RateTransposer extends AbstractFifoSamplePipe {
+    public class RateTransposer extends AbstractFifoSamplePipe implements IFifoSamplePipe {
         private var _rate:Number;
         private var slopeCount:Number;
         private var prevSampleL:Number;
         private var prevSampleR:Number;
 
-        public function RateTransposer() {
+        public function RateTransposer(createBuffers:Boolean = false) {
+            super(createBuffers);
             reset();
             rate = 1;
         }

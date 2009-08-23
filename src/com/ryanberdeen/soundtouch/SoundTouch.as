@@ -19,7 +19,7 @@
 */
 
 package com.ryanberdeen.soundtouch {
-    public class SoundTouch extends AbstractFifoSamplePipe {
+    public class SoundTouch implements IFifoSamplePipe {
         private var _rate:Number;
         private var _tempo:Number;
 
@@ -30,7 +30,9 @@ package com.ryanberdeen.soundtouch {
         private var rateTransposer:RateTransposer;
         private var tdStretch:Stretch;
 
+        private var _inputBuffer:FifoSampleBuffer;
         private var intermediateBuffer:FifoSampleBuffer;
+        private var _outputBuffer:FifoSampleBuffer;
 
         public function SoundTouch() {
             rateTransposer = new RateTransposer();
@@ -50,6 +52,10 @@ package com.ryanberdeen.soundtouch {
             calculateEffectiveRateAndTempo();
         }
 
+        public function get rate():Number {
+            return _rate;
+        }
+
         public function set rate(rate:Number):void {
             virtualRate = rate;
             calculateEffectiveRateAndTempo();
@@ -57,6 +63,10 @@ package com.ryanberdeen.soundtouch {
 
         public function set rateChange(rateChange:Number):void {
             rate = 1.0 + 0.01 * rateChange;
+        }
+
+        public function get tempo():Number {
+            return _tempo;
         }
 
         public function set tempo(tempo:Number):void {
@@ -80,6 +90,14 @@ package com.ryanberdeen.soundtouch {
 
         public function set pitchSemitones(pitchSemitones:Number):void {
             pitchOctaves = pitchSemitones / 12.0;
+        }
+
+        public function get inputBuffer():FifoSampleBuffer {
+            return _inputBuffer;
+        }
+
+        public function get outputBuffer():FifoSampleBuffer {
+            return _outputBuffer;
         }
 
         private function testFloatEqual(a:Number, b:Number):Boolean {

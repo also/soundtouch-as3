@@ -3,7 +3,7 @@
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml">
   <mx:Panel title="SoundTouch Demo" width="100%" paddingTop="10" paddingRight="10" paddingBottom="10" paddingLeft="10">
     <mx:HBox paddingBottom="10">
-      <mx:Button id="browseButton" label="Choose a song…" click="chooseFile();"/>
+      <mx:Button id="browseButton" label="Open an MP3…" click="chooseFile();"/>
     </mx:HBox>
     <mx:VBox width="100%">
       <mx:Label text="Tempo"/>
@@ -16,9 +16,12 @@
       <mx:HSlider id="pitchSlider" minimum="-1" maximum="1" value="0" snapInterval="0.01" liveDragging="false" change="updateFilter();" width="100%"/>
     </mx:VBox>
     <mx:Button id="playButton" label="Play" enabled="false" click="togglePlayPause();"/>
+    <mx:Label text="Tempo: " id="tempoLabel"/>
+    <mx:Label text="Rate: " id="rateLabel"/>
   </mx:Panel>
 
   <mx:Script><![CDATA[
+    import com.ryanberdeen.soundtouch.SimpleFilter;
     import com.ryanberdeen.soundtouch.SoundTouch;
     import com.ryanberdeen.soundtouch.FifoSampleBuffer;
 
@@ -35,7 +38,7 @@
 
     private var outputSound:Sound;
     private var soundChannel:SoundChannel;
-    private var stretch:SoundTouch;
+    private var soundTouch:SoundTouch;
 
     private var playing:Boolean;
 
@@ -63,30 +66,27 @@
       resetPlayer();
 
       outputSound = new Sound();
-      stretch = new SoundTouch();
+      soundTouch = new SoundTouch();
       updateFilter();
-      var sourcePosition:uint = 0;
 
-      outputSound.addEventListener(SampleDataEvent.SAMPLE_DATA, function(e:SampleDataEvent):void {
-        while (stretch.outputBuffer.frameCount < 4096) {
-          var bytes:ByteArray = new ByteArray();
-          // FIXME calculate input chunk size
-          var numFrames:uint = 8192 - stretch.inputBuffer.frameCount;
-          var numFramesExtracted:uint = sound.extract(bytes, numFrames, sourcePosition);
-          if (numFramesExtracted < numFrames) {
-            return;
-            // TODO flush stretch
-          }
-          sourcePosition += numFramesExtracted;
-          stretch.inputBuffer.putBytes(bytes);
-          stretch.process();
-        }
-        stretch.outputBuffer.receiveBytes(e.data, 4096);
-      });
+      var filter:SimpleFilter = new SimpleFilter(sound, soundTouch);
+
+      outputSound.addEventListener(SampleDataEvent.SAMPLE_DATA, filter.handleSampleData);
 
       playButton.enabled = true;
       playButton.label = "Play";
       playing = false;
+    }
+
+    private function updateFilter():void {
+      if (soundTouch != null) {
+        soundTouch.tempo = tempoSlider.value;
+        soundTouch.rate = rateSlider.value;
+        soundTouch.pitchOctaves = pitchSlider.value;
+
+        tempoLabel.text = "Tempo: " + soundTouch.tempo;
+        rateLabel.text = "Rate: " + soundTouch.rate;
+      }
     }
 
     private function resetPlayer():void {
@@ -127,14 +127,6 @@
 
       playButton.label = "Play";
       playing = false;
-    }
-
-    private function updateFilter():void {
-      if (stretch != null) {
-        stretch.tempo = tempoSlider.value;
-        stretch.rate = rateSlider.value;
-        stretch.pitchOctaves = pitchSlider.value;
-      }
     }
   ]]></mx:Script>
 </mx:Application>

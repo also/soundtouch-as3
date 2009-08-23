@@ -22,7 +22,7 @@ package com.ryanberdeen.soundtouch {
   import flash.media.Sound;
   import flash.utils.ByteArray;
 
-  public class Stretch extends AbstractFifoSamplePipe {
+  public class Stretch extends AbstractFifoSamplePipe implements IFifoSamplePipe {
     // Default values for sound processing parameters:
 
     /**
@@ -110,7 +110,8 @@ package com.ryanberdeen.soundtouch {
     private var bAutoSeqSetting:Boolean;
     private var bAutoSeekSetting:Boolean;
 
-    public function Stretch():void {
+    public function Stretch(createBuffers:Boolean = false):void {
+      super(createBuffers);
       bQuickSeek = true;
       bMidBufferDirty = false;
 
