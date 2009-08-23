@@ -8,10 +8,7 @@ SoundTouch AS3 allows realtime processing of audio in Flash 10. It includes filt
 Roadmap
 =======
 
-The original C++ library includes several features that have not yet been implemented in ActionScript. These include:
-
- * A SoundSouch class, which greatly simplifies the use of the rate transposer and time-domain stretch filter.
- * A FIR filter, which can be used to prevent aliasing during rate transposition.
+The original C++ library includes several features that have not yet been implemented in ActionScript, including a FIR filter, which can be used to prevent aliasing during rate transposition.
 
 License
 =======

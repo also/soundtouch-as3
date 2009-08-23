@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml">
-  <mx:Panel title="TD Stretch Demo" width="100%" paddingTop="10" paddingRight="10" paddingBottom="10" paddingLeft="10">
+  <mx:Panel title="SoundTouch Demo" width="100%" paddingTop="10" paddingRight="10" paddingBottom="10" paddingLeft="10">
     <mx:HBox paddingBottom="10">
       <mx:Button id="browseButton" label="Choose a song…" click="chooseFile();"/>
     </mx:HBox>
     <mx:VBox width="100%">
-      <mx:Label text="Tempo Adjustment"/>
-      <mx:HSlider id="tempoSlider" minimum="0" maximum="2" value="1" snapInterval="0.01" liveDragging="false" change="updateTempo();" width="100%"/>
+      <mx:Label text="Tempo"/>
+      <mx:HSlider id="tempoSlider" minimum="0" maximum="2" value="1" snapInterval="0.01" liveDragging="false" change="updateFilter();" width="100%"/>
+
+      <mx:Label text="Rate"/>
+      <mx:HSlider id="rateSlider" minimum="0" maximum="2" value="1" snapInterval="0.01" liveDragging="false" change="updateFilter();" width="100%"/>
+
+      <mx:Label text="Pitch"/>
+      <mx:HSlider id="pitchSlider" minimum="-1" maximum="1" value="0" snapInterval="0.01" liveDragging="false" change="updateFilter();" width="100%"/>
     </mx:VBox>
     <mx:Button id="playButton" label="Play" enabled="false" click="togglePlayPause();"/>
   </mx:Panel>
 
   <mx:Script><![CDATA[
-    import com.ryanberdeen.soundtouch.Stretch;
+    import com.ryanberdeen.soundtouch.SoundTouch;
     import com.ryanberdeen.soundtouch.FifoSampleBuffer;
 
     import flash.events.Event;
@@ -29,7 +35,7 @@
 
     private var outputSound:Sound;
     private var soundChannel:SoundChannel;
-    private var stretch:Stretch;
+    private var stretch:SoundTouch;
 
     private var playing:Boolean;
 
@@ -57,29 +63,25 @@
       resetPlayer();
 
       outputSound = new Sound();
-      stretch = new Stretch();
-      var inputBuffer:FifoSampleBuffer = new FifoSampleBuffer();
-      var outputBuffer:FifoSampleBuffer = new FifoSampleBuffer();
-      stretch.inputBuffer = inputBuffer;
-      stretch.outputBuffer = outputBuffer;
-      stretch.tempo = tempoSlider.value;
-
+      stretch = new SoundTouch();
+      updateFilter();
       var sourcePosition:uint = 0;
 
       outputSound.addEventListener(SampleDataEvent.SAMPLE_DATA, function(e:SampleDataEvent):void {
-        while (outputBuffer.frameCount < 4096) {
+        while (stretch.outputBuffer.frameCount < 4096) {
           var bytes:ByteArray = new ByteArray();
-          var numFrames:uint = stretch.inputChunkSize - inputBuffer.frameCount;
+          // FIXME calculate input chunk size
+          var numFrames:uint = 8192 - stretch.inputBuffer.frameCount;
           var numFramesExtracted:uint = sound.extract(bytes, numFrames, sourcePosition);
           if (numFramesExtracted < numFrames) {
             return;
             // TODO flush stretch
           }
           sourcePosition += numFramesExtracted;
-          inputBuffer.putBytes(bytes);
+          stretch.inputBuffer.putBytes(bytes);
           stretch.process();
         }
-        outputBuffer.receiveBytes(e.data, 4096);
+        stretch.outputBuffer.receiveBytes(e.data, 4096);
       });
 
       playButton.enabled = true;
@@ -127,9 +129,11 @@
       playing = false;
     }
 
-    private function updateTempo():void {
+    private function updateFilter():void {
       if (stretch != null) {
         stretch.tempo = tempoSlider.value;
+        stretch.rate = rateSlider.value;
+        stretch.pitchOctaves = pitchSlider.value;
       }
     }
   ]]></mx:Script>
