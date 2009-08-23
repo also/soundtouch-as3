@@ -124,6 +124,10 @@ package com.ryanberdeen.soundtouch {
             }
         }
 
+        public function ensureAdditionalCapacity(numFrames:uint):void {
+            ensureCapacity(frameCount + numFrames);
+        }
+
         public function rewind():void {
             if (_position > 0) {
                 var offset:int = startIndex;

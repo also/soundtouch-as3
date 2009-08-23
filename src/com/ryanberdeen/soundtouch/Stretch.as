@@ -513,7 +513,7 @@ package com.ryanberdeen.soundtouch {
           // samples in 'midBuffer' using sliding overlapping
           // ... first partially overlap with the end of the previous sequence
           // (that's in 'midBuffer')
-          _outputBuffer.ensureCapacity(_outputBuffer.frameCount + overlapLength);
+          _outputBuffer.ensureAdditionalCapacity(overlapLength);
           overlap(uint(offset));
           _outputBuffer.put(overlapLength);
 
