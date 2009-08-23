@@ -7,10 +7,10 @@
     </mx:HBox>
     <mx:VBox width="100%">
       <mx:Label text="Tempo"/>
-      <mx:HSlider id="tempoSlider" minimum="0" maximum="2" value="1" snapInterval="0.01" liveDragging="false" change="updateFilter();" width="100%"/>
+      <mx:HSlider id="tempoSlider" minimum="0.01" maximum="1.99" value="1" snapInterval="0.01" liveDragging="false" change="updateFilter();" width="100%"/>
 
       <mx:Label text="Rate"/>
-      <mx:HSlider id="rateSlider" minimum="0" maximum="2" value="1" snapInterval="0.01" liveDragging="false" change="updateFilter();" width="100%"/>
+      <mx:HSlider id="rateSlider" minimum="0.01" maximum="1.99" value="1" snapInterval="0.01" liveDragging="false" change="updateFilter();" width="100%"/>
 
       <mx:Label text="Pitch"/>
       <mx:HSlider id="pitchSlider" minimum="-1" maximum="1" value="0" snapInterval="0.01" liveDragging="false" change="updateFilter();" width="100%"/>
