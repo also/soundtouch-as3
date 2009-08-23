@@ -3,12 +3,15 @@ SoundTouch AS3
 
 An ActionScript 3 port of the [SoundTouch][1] audio processing library.
 
-SoundTouch AS3 allows realtime playback of processed audio in Flash 10. It currently supports time compression/expansion.
+SoundTouch AS3 allows realtime processing of audio in Flash 10. It includes filters that perform time compression/expansion and rate transposition. In tandem, these filters can perform pitch-shifting.
 
 Roadmap
 =======
 
-Pitch shifting and playback rate change are include in the original C++ library, and have yet to be ported to ActionScript.
+The original C++ library includes several features that have not yet been implemented in ActionScript. These include:
+
+ * A SoundSouch class, which greatly simplifies the use of the rate transposer and time-domain stretch filter.
+ * A FIR filter, which can be used to prevent aliasing during rate transposition.
 
 License
 =======
