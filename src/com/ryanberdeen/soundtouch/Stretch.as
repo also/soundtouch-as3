@@ -22,7 +22,7 @@ package com.ryanberdeen.soundtouch {
   import flash.media.Sound;
   import flash.utils.ByteArray;
 
-  public class Stretch {
+  public class Stretch extends AbstractFifoSamplePipe {
     // Default values for sound processing parameters:
 
     /**
@@ -90,9 +90,6 @@ package com.ryanberdeen.soundtouch {
         [  -4,   -3,   -2,   -1,    1,    2,    3,    4,    0,    0,    0,   0,
             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   0]];
 
-    private var _inputBuffer:FifoSampleBuffer;
-    private var _outputBuffer:FifoSampleBuffer;
-
     private var sampleReq:int;
     private var _tempo:Number;
 
@@ -125,14 +122,6 @@ package com.ryanberdeen.soundtouch {
 
       _tempo = 1;
       setParameters(44100, DEFAULT_SEQUENCE_MS, DEFAULT_SEEKWINDOW_MS, DEFAULT_OVERLAP_MS);
-    }
-
-    public function set inputBuffer(inputBuffer:FifoSampleBuffer):void {
-      _inputBuffer = inputBuffer;
-    }
-
-    public function set outputBuffer(outputBuffer:FifoSampleBuffer):void {
-      _outputBuffer = outputBuffer;
     }
 
     /**
