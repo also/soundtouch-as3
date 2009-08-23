@@ -92,8 +92,10 @@ package com.ryanberdeen.soundtouch {
             putSamples(buffer.vector, buffer.position + position, numFrames);
         }
 
-        public function receive(numFrames:uint):void {
-            numFrames = Math.min(_frameCount, numFrames);
+        public function receive(numFrames:int = -1):void {
+            if (numFrames < 0 || numFrames > _frameCount) {
+                numFrames = _frameCount
+            }
             _frameCount -= numFrames;
             _position += numFrames;
         }
