@@ -5,6 +5,22 @@ An ActionScript 3 port of the [SoundTouch][1] audio processing library.
 
 SoundTouch AS3 allows realtime processing of audio in Flash 10. It includes filters that perform time compression/expansion and rate transposition. In tandem, these filters can perform pitch-shifting.
 
+Usage
+=====
+
+    var source:Sound = …;
+    var output:Sound = new Sound();
+
+    var soundTouch:SoundTouch = new SoundTouch();
+    soundTouch.pitchSemitones = -6;
+
+    var filter:SimpleFilter = new SimpleFilter(sound, soundTouch);
+    output.addEventListener(SampleDataEvent.SAMPLE_DATA, filter.handleSampleData);
+
+    output.play();
+
+For details on using the SoundTouch, Stretch, or RateTransposer classes, look in SimpleFilter and FilterSupport.
+
 Roadmap
 =======
 
