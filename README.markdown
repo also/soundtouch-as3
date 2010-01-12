@@ -26,6 +26,11 @@ Roadmap
 
 The original C++ library includes several features that have not yet been implemented in ActionScript, including a FIR filter, which can be used to prevent aliasing during rate transposition.
 
+Support
+=======
+
+For issues using SoundTouch AS3, open an ticket at the [GitHub project][2], or contact [ryan@ryanberdeen.com][3].
+
 License
 =======
 
@@ -49,3 +54,5 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 [1]: http://www.surina.net/soundtouch/
+[2]: http://github.com/also/soundtouch-as3/issues
+[3]: mailto:ryan@ryanberdeen.com
