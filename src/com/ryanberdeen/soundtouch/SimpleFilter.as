@@ -24,12 +24,33 @@ package com.ryanberdeen.soundtouch {
 
     public class SimpleFilter extends FilterSupport {
         private var sourceSound:Sound;
+        private var historyBufferSize:int;
         private var sourcePosition:int;
+        private var outputBufferPosition:int;
+        private var _position:int;
 
         public function SimpleFilter(sourceSound:Sound, pipe:IFifoSamplePipe) {
             super(pipe);
             this.sourceSound = sourceSound;
+            this.historyBufferSize = 22050;
             sourcePosition = 0;
+            outputBufferPosition = 0;
+        }
+
+        public function get position():int {
+            return _position;
+        }
+
+        public function set position(position:int):void {
+            if (position > _position) {
+                throw new RangeError('New position may not be greater than current position');
+            }
+            var newOutputBufferPosition:int = outputBufferPosition - (_position - position);
+            if (newOutputBufferPosition < 0) {
+                throw new RangeError('New position falls outside of history buffer');
+            }
+            outputBufferPosition = newOutputBufferPosition;
+            _position = position;
         }
 
         override protected function fillInputBuffer(numFrames:int):void {
@@ -40,10 +61,17 @@ package com.ryanberdeen.soundtouch {
         }
 
         public function extract(target:ByteArray, numFrames:int):int {
-            fillOutputBuffer(numFrames);
-            var result:int = Math.min(numFrames, outputBuffer.frameCount);
-            outputBuffer.receiveBytes(target, result);
-            return result;
+            fillOutputBuffer(outputBufferPosition + numFrames);
+
+            var numFramesExtracted:int = Math.min(numFrames, outputBuffer.frameCount - outputBufferPosition);
+            outputBuffer.extract(target, outputBufferPosition, numFramesExtracted);
+
+            var currentFrames:int = outputBufferPosition + numFramesExtracted;
+            outputBufferPosition = Math.min(historyBufferSize, currentFrames);
+            outputBuffer.receive(Math.max(currentFrames - historyBufferSize, 0));
+
+            _position += numFramesExtracted;
+            return numFramesExtracted;
         }
 
         public function handleSampleData(e:SampleDataEvent):void {

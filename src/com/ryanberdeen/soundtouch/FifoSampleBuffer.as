@@ -110,12 +110,16 @@ package com.ryanberdeen.soundtouch {
         }
 
         public function receiveBytes(output:ByteArray, numFrames:uint):void {
+            extract(output, 0, numFrames);
+            receive(numFrames);
+        }
+
+        public function extract(output:ByteArray, position:uint, numFrames:uint):void {
+            var sourceOffset:uint = startIndex + position * 2;
             var numSamples:uint = numFrames * 2;
-            var sourceOffset:uint = startIndex;
             for (var i:uint = 0; i < numSamples; i++) {
                 output.writeFloat(_vector[i + sourceOffset]);
             }
-            receive(numFrames);
         }
 
         public function ensureCapacity(numFrames:uint):void {
