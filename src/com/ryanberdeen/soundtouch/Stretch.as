@@ -125,6 +125,18 @@ package com.ryanberdeen.soundtouch {
       setParameters(44100, DEFAULT_SEQUENCE_MS, DEFAULT_SEEKWINDOW_MS, DEFAULT_OVERLAP_MS);
     }
 
+    override public function clear():void {
+        super.clear();
+        clearMidBuffer();
+    }
+
+    private function clearMidBuffer():void {
+        if (bMidBufferDirty) {
+            bMidBufferDirty = false;
+            pMidBuffer = null;
+        }
+    }
+
     /**
     * Sets routine control parameters. These control are certain time constants
     * defining how the sound is stretched to the desired duration.

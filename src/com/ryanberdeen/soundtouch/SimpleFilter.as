@@ -77,5 +77,10 @@ package com.ryanberdeen.soundtouch {
         public function handleSampleData(e:SampleDataEvent):void {
             extract(e.data, 4096);
         }
+
+        override public function clear():void {
+            super.clear();
+            outputBufferPosition = 0;
+        }
     }
 }

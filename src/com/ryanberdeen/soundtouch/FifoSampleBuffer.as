@@ -50,6 +50,11 @@ package com.ryanberdeen.soundtouch {
             return (_position + _frameCount) * 2;
         }
 
+        public function clear():void {
+            receive(frameCount);
+            rewind();
+        }
+
         public function put(numFrames:uint):void {
             _frameCount += numFrames;
         }

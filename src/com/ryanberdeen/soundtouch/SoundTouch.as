@@ -52,6 +52,11 @@ package com.ryanberdeen.soundtouch {
             calculateEffectiveRateAndTempo();
         }
 
+        public function clear():void {
+            rateTransposer.clear();
+            tdStretch.clear();
+        }
+
         public function get rate():Number {
             return _rate;
         }

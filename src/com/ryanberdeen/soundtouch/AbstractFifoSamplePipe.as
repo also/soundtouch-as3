@@ -45,5 +45,10 @@ package com.ryanberdeen.soundtouch {
         public function set outputBuffer(outputBuffer:FifoSampleBuffer):void {
           _outputBuffer = outputBuffer;
         }
+
+        public function clear():void {
+            _inputBuffer.clear();
+            _outputBuffer.clear();
+        }
     }
 }

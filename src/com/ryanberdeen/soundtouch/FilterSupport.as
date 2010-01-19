@@ -55,5 +55,9 @@ package com.ryanberdeen.soundtouch {
                 _pipe.process();
             }
         }
+
+        public function clear():void {
+            _pipe.clear();
+        }
     }
 }
