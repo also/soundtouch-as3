@@ -25,7 +25,7 @@ package com.ryanberdeen.soundtouch {
     public class SimpleFilter extends FilterSupport {
         private var sourceSound:Sound;
         private var historyBufferSize:int;
-        private var sourcePosition:int;
+        private var _sourcePosition:int;
         private var outputBufferPosition:int;
         private var _position:int;
 
@@ -33,7 +33,7 @@ package com.ryanberdeen.soundtouch {
             super(pipe);
             this.sourceSound = sourceSound;
             this.historyBufferSize = 22050;
-            sourcePosition = 0;
+            _sourcePosition = 0;
             outputBufferPosition = 0;
         }
 
@@ -53,10 +53,19 @@ package com.ryanberdeen.soundtouch {
             _position = position;
         }
 
+        public function get sourcePosition():int {
+            return _sourcePosition;
+        }
+
+        public function set sourcePosition(sourcePosition:int):void {
+            clear();
+            _sourcePosition = sourcePosition;
+        }
+
         override protected function fillInputBuffer(numFrames:int):void {
             var bytes:ByteArray = new ByteArray();
-            var numFramesExtracted:uint = sourceSound.extract(bytes, numFrames, sourcePosition);
-            sourcePosition += numFramesExtracted;
+            var numFramesExtracted:uint = sourceSound.extract(bytes, numFrames, _sourcePosition);
+            _sourcePosition += numFramesExtracted;
             inputBuffer.putBytes(bytes);
         }
 
