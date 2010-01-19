@@ -29,7 +29,7 @@ The original C++ library includes several features that have not yet been implem
 Support
 =======
 
-For issues using SoundTouch AS3, open an ticket at the [GitHub project][2], or contact [ryan@ryanberdeen.com][3].
+For issues using SoundTouch AS3, open a ticket at the [GitHub project][2], or contact [ryan@ryanberdeen.com][3].
 
 License
 =======
