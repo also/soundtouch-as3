@@ -27,6 +27,12 @@ package {
     import flash.media.Sound;
     import flash.media.SoundChannel;
 
+    /** Dispatched when the sound is played. */
+    [Event(type="flash.events.Event", name="play")]
+
+    /** Dispatched whent the sound is paused. */
+    [Event(type="flash.events.Event", name="pause")]
+
     /**
     * Example of an audio player using Soundtouch. It supports manipulating the
     * tempo, rate, and pitch during playback.
