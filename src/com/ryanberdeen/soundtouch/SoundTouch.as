@@ -35,8 +35,8 @@ package com.ryanberdeen.soundtouch {
         private var _outputBuffer:FifoSampleBuffer;
 
         public function SoundTouch() {
-            rateTransposer = new RateTransposer();
-            tdStretch = new Stretch();
+            rateTransposer = new RateTransposer(false);
+            tdStretch = new Stretch(false);
 
             _inputBuffer = new FifoSampleBuffer();
             intermediateBuffer = new FifoSampleBuffer();
@@ -55,6 +55,13 @@ package com.ryanberdeen.soundtouch {
         public function clear():void {
             rateTransposer.clear();
             tdStretch.clear();
+        }
+
+        public function clone():IFifoSamplePipe {
+            var result:SoundTouch = new SoundTouch();
+            result.rate = rate;
+            result.tempo = tempo;
+            return result;
         }
 
         public function get rate():Number {

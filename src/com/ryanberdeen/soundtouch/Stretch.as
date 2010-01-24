@@ -110,7 +110,7 @@ package com.ryanberdeen.soundtouch {
     private var bAutoSeqSetting:Boolean;
     private var bAutoSeekSetting:Boolean;
 
-    public function Stretch(createBuffers:Boolean = false):void {
+    public function Stretch(createBuffers:Boolean = true):void {
       super(createBuffers);
       bQuickSeek = true;
       bMidBufferDirty = false;
@@ -287,7 +287,7 @@ package com.ryanberdeen.soundtouch {
         bQuickSeek = enable;
     }
 
-    public function clone():Stretch {
+    public function clone():IFifoSamplePipe {
         var result:Stretch = new Stretch();
         result.tempo = tempo;
         result.setParameters(sampleRate, sequenceMs, seekWindowMs, overlapMs);

@@ -24,5 +24,6 @@ package com.ryanberdeen.soundtouch {
         function get outputBuffer():FifoSampleBuffer;
         function process():void;
         function clear():void;
+        function clone():IFifoSamplePipe;
     }
 }

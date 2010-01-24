@@ -25,7 +25,7 @@ package com.ryanberdeen.soundtouch {
         private var prevSampleL:Number;
         private var prevSampleR:Number;
 
-        public function RateTransposer(createBuffers:Boolean = false) {
+        public function RateTransposer(createBuffers:Boolean = true) {
             super(createBuffers);
             reset();
             rate = 1;
@@ -40,6 +40,12 @@ package com.ryanberdeen.soundtouch {
             slopeCount = 0;
             prevSampleL = 0;
             prevSampleR = 0;
+        }
+
+        public function clone():IFifoSamplePipe {
+            var result:RateTransposer = new RateTransposer();
+            result.rate = _rate;
+            return result;
         }
 
         public function process():void {

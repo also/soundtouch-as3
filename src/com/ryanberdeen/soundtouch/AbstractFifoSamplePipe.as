@@ -23,7 +23,7 @@ package com.ryanberdeen.soundtouch {
         protected var _inputBuffer:FifoSampleBuffer;
         protected var _outputBuffer:FifoSampleBuffer;
 
-        public function AbstractFifoSamplePipe(createBuffers:Boolean = false) {
+        public function AbstractFifoSamplePipe(createBuffers:Boolean = true) {
             if (createBuffers) {
                 inputBuffer = new FifoSampleBuffer();
                 outputBuffer = new FifoSampleBuffer();
