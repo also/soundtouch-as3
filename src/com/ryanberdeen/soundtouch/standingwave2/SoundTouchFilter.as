@@ -22,25 +22,16 @@ package com.ryanberdeen.soundtouch.standingwave2 {
     import com.noteflight.standingwave2.elements.IAudioFilter;
     import com.noteflight.standingwave2.elements.IAudioSource;
     import com.noteflight.standingwave2.elements.Sample;
-    import com.ryanberdeen.soundtouch.FifoSampleBuffer;
-    import com.ryanberdeen.soundtouch.Stretch;
 
-    public class StretchFilter implements IAudioFilter {
+    import com.ryanberdeen.soundtouch.FilterSupport;
+    import com.ryanberdeen.soundtouch.IFifoSamplePipe;
+
+    public class SoundTouchFilter extends FilterSupport implements IAudioFilter {
         private var _source:IAudioSource;
         private var _position:Number;
 
-        private var _stretch:Stretch;
-
-        private var _inputBuffer:FifoSampleBuffer;
-        private var _outputBuffer:FifoSampleBuffer;
-
-        public function StretchFilter() {
-            _stretch = new Stretch();
-            resetBuffers();
-        }
-
-        public function get stretch():Stretch {
-            return _stretch;
+        public function SoundTouchFilter(pipe:IFifoSamplePipe) {
+            super(pipe);
         }
 
         public function get descriptor():AudioDescriptor {
@@ -52,9 +43,9 @@ package com.ryanberdeen.soundtouch.standingwave2 {
         }
 
         public function set source(source:IAudioSource):void {
-            // TODO stretch can actually handle other rates
+            // TODO can actually handle other rates
             if (source.descriptor.channels != AudioDescriptor.CHANNELS_STEREO || source.descriptor.rate != AudioDescriptor.RATE_44100) {
-                throw new ArgumentError('StretchFilter requires a stereo source at 44100 Hz');
+                throw new ArgumentError('SoundTouchFilter requires a stereo source at 44100 Hz');
             }
             _source = source;
         }
@@ -74,39 +65,26 @@ package com.ryanberdeen.soundtouch.standingwave2 {
         }
 
         private function resetBuffers():void {
-            _inputBuffer = new FifoSampleBuffer();
-            _stretch.inputBuffer = _inputBuffer;
-            _outputBuffer = new FifoSampleBuffer();
-            _stretch.outputBuffer = _outputBuffer;
+            clear();
+        }
+
+        override protected function fillInputBuffer(numFrames:int):void {
+            var framesAvailable:uint = _source.frameCount - _source.position;
+            var inputSample:Sample = _source.getSample(Math.min(numFrames, framesAvailable));
+
+            StandingWaveUtils.putSample(inputBuffer, inputSample);
         }
 
         public function getSample(numFrames:Number):Sample {
-            while (_outputBuffer.frameCount < numFrames) {
-                var numInputFrames:uint = _stretch.inputChunkSize - _inputBuffer.frameCount;
-                var framesAvailable:uint = _source.frameCount - _source.position;
-
-                var inputSample:Sample = _source.getSample(Math.min(numInputFrames, framesAvailable));
-
-                StandingWaveUtils.putSample(_inputBuffer, inputSample);
-
-                if (inputSample.frameCount < numInputFrames) {
-                    break;
-                    // TODO flush stretch
-                }
-
-                _stretch.process();
-            }
-
-            var result:Sample = StandingWaveUtils.createSample(_outputBuffer, numFrames);
+            fillOutputBuffer(numFrames);
+            var result:Sample = StandingWaveUtils.createSample(outputBuffer, numFrames);
             _position += result.frameCount;
 
             return result;
         }
 
         public function clone():IAudioSource {
-            var result:StretchFilter = new StretchFilter();
-            result._stretch = _stretch.clone();
-            result.resetBuffers();
+            var result:SoundTouchFilter = new SoundTouchFilter(pipe.clone());
             return result;
         }
     }
