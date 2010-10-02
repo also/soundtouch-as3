@@ -25,43 +25,44 @@ package com.ryanberdeen.soundtouch.standingwave3 {
     public class StandingWaveUtils {
         public static const AUDIO_DESCRIPTOR:AudioDescriptor = new AudioDescriptor();
 
-        public static function putSample(buffer:FifoSampleBuffer, sample:Sample):void {
-            var numFrames:uint = sample.frameCount;
-            buffer.ensureCapacity(numFrames);
+        public static function putSample(inputBuffer:FifoSampleBuffer, inputSample:Sample):void {
+            var inputFrames:uint = inputSample.frameCount;
+            inputBuffer.ensureCapacity(inputFrames);
 
-            var dest:Vector.<Number> = buffer.vector;
-            var destOffset:uint = buffer.endIndex;
+            var dest:Vector.<Number> = inputBuffer.vector;
+            var destOffset:uint = inputBuffer.endIndex;
 
-            var l:Vector.<Number> = sample.channelData[0];
-            var r:Vector.<Number> = sample.channelData[1];
+            var leftInput:Vector.<Number> = inputSample.channelData[0];
+            var rightInput:Vector.<Number> = inputSample.channelData[1];
 
-            for (var i:uint = 0; i < numFrames; i++) {
-                var destIndex:uint = i * 2 + destOffset;
-                dest[destIndex] = l[i];
-                dest[destIndex + 1] = r[i];
+            for (var inputIndex:uint = 0; inputIndex < inputFrames; inputIndex++) {
+                var destIndex:uint = inputIndex * 2 + destOffset;
+                dest[destIndex] =  leftInput[inputIndex];
+                dest[destIndex + 1] = rightInput[inputIndex];
             }
 
-            buffer.put(numFrames);
+            inputBuffer.put(inputFrames);
         }
 
-        public static function createSample(buffer:FifoSampleBuffer, maxNumFrames:uint):Sample {
-            var numFrames:uint = Math.min(maxNumFrames, buffer.frameCount);
+        public static function createSample(outputBuffer:FifoSampleBuffer, numFrames:uint):Sample {
+            var outputFrames:uint = Math.min(numFrames, outputBuffer.frameCount);
+            var sample:Sample = new Sample(AUDIO_DESCRIPTOR, outputFrames);
 
-            var sample:Sample = new Sample(AUDIO_DESCRIPTOR, numFrames);
+            var source:Vector.<Number> = outputBuffer.vector;
+            var sourceOffset:uint = outputBuffer.startIndex;
 
-            var source:Vector.<Number> = buffer.vector;
-            var sourceOffset:uint = buffer.startIndex;
+            var leftOutput:Vector.<Number> = sample.channelData[0];
+            var rightOutput:Vector.<Number> = sample.channelData[1];
 
-            var l:Vector.<Number> = sample.channelData[0];
-            var r:Vector.<Number> = sample.channelData[1];
-
-            for (var i:uint = 0; i < numFrames; i++) {
-                var sourceIndex:uint = i * 2 + sourceOffset;
-                l[i] = source[sourceIndex];
-                r[i] = source[sourceIndex + 1];
+            for (var outputIndex:uint = 0; outputIndex < outputFrames; outputIndex++) {
+                var sourceIndex:uint = outputIndex * 2 + sourceOffset;
+                leftOutput[outputIndex] = source[sourceIndex];
+                rightOutput[outputIndex] = source[sourceIndex + 1];
             }
+	        sample.invalidateSampleMemory();
+	        sample.commitChannelData();
 
-            buffer.receive(numFrames);
+            outputBuffer.receive(outputFrames);
 
             return sample;
         }
