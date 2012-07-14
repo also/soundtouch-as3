@@ -1,3 +1,13 @@
+StandingWave3 support-related changes
+========================
+
+[StandingWave3](http://github.com/maxl0rd/standingwave3) support files are in
+*com.ryanberdeen.soundtouch.standingwave3* package.
+
+* Invalidate & commit after changing Sample channelData
+* Package names and import statements changed appropriately.
+
+
 SoundTouch AS3
 ==============
 
